@@ -21,6 +21,12 @@ const (
 
 	ResourcePoolAnnotations = "hami.io/resource-pool"
 	FlavorAnnotations       = "hami.io/flavor"
+
+	// fmt.Sprintf(ShareModeAnnoTpl, uuid)
+	ShareModeAnnotationTpl = "sharemode.gpu.bytetrade.io/%s"
+	ShareModeExclusive     = "0"
+	ShareModeMemSlicing    = "1"
+	ShareModeTimeSlicing   = "2"
 )
 
 type DevicePluginConfigs struct {
@@ -89,17 +95,18 @@ type DeviceUsage struct {
 }
 
 type DeviceInfo struct {
-	ID      string
-	AliasId string
-	Index   uint
-	Count   int32
-	Devmem  int32
-	Devcore int32
-	Type    string
-	Numa    int
-	Mode    string
-	Health  bool
-	Driver  string
+	ID        string
+	AliasId   string
+	Index     uint
+	Count     int32
+	Devmem    int32
+	Devcore   int32
+	Type      string
+	Numa      int
+	Mode      string
+	Health    bool
+	Driver    string
+	ShareMode string
 }
 
 type NodeInfo struct {

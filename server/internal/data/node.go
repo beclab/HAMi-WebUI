@@ -78,20 +78,21 @@ func (r *nodeRepo) updateLocalNodes() {
 				}
 				for _, device := range devices {
 					n[node.UID].Devices = append(bizNode.Devices, &biz.DeviceInfo{
-						Index:    int(device.Index),
-						Id:       device.ID,
-						AliasId:  device.AliasId,
-						Count:    device.Count,
-						Devmem:   device.Devmem,
-						Devcore:  device.Devcore,
-						Type:     device.Type,
-						Numa:     device.Numa,
-						Mode:     device.Mode,
-						Health:   device.Health,
-						NodeName: node.Name,
-						NodeUid:  string(node.UID),
-						Provider: p.GetProvider(),
-						Driver:   device.Driver,
+						Index:     int(device.Index),
+						Id:        device.ID,
+						AliasId:   device.AliasId,
+						Count:     device.Count,
+						Devmem:    device.Devmem,
+						Devcore:   device.Devcore,
+						Type:      device.Type,
+						Numa:      device.Numa,
+						Mode:      device.Mode,
+						Health:    device.Health,
+						NodeName:  node.Name,
+						NodeUid:   string(node.UID),
+						Provider:  p.GetProvider(),
+						Driver:    device.Driver,
+						ShareMode: device.ShareMode,
 					})
 				}
 			}

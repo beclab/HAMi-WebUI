@@ -24,20 +24,21 @@ type Node struct {
 }
 
 type DeviceInfo struct {
-	Index    int
-	Id       string
-	AliasId  string
-	Count    int32
-	Devmem   int32
-	Devcore  int32
-	Type     string
-	Numa     int
-	Mode     string
-	Health   bool
-	NodeName string
-	NodeUid  string
-	Provider string
-	Driver   string
+	Index     int
+	Id        string
+	AliasId   string
+	Count     int32
+	Devmem    int32
+	Devcore   int32
+	Type      string
+	Numa      int
+	Mode      string
+	Health    bool
+	NodeName  string
+	NodeUid   string
+	Provider  string
+	Driver    string
+	ShareMode string
 }
 
 type DeviceTotal struct {

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -21,10 +22,11 @@ type ContainerService struct {
 
 	node *biz.NodeUsecase
 	pod  *biz.PodUseCase
+	ms   *MonitorService
 }
 
-func NewContainerService(node *biz.NodeUsecase, pod *biz.PodUseCase) *ContainerService {
-	return &ContainerService{node: node, pod: pod}
+func NewContainerService(node *biz.NodeUsecase, pod *biz.PodUseCase, ms *MonitorService) *ContainerService {
+	return &ContainerService{node: node, pod: pod, ms: ms}
 }
 
 func (s *ContainerService) GetAllContainers(ctx context.Context, req *pb.GetAllContainersReq) (*pb.ContainersReply, error) {
@@ -65,7 +67,9 @@ func (s *ContainerService) GetAllContainers(ctx context.Context, req *pb.GetAllC
 		containerReply.Priority = container.Priority
 		for _, containerDevice := range container.ContainerDevices {
 			deviceID := containerDevice.UUID
-			if device, err := s.node.FindDeviceByAliasId(containerDevice.UUID); err == nil {
+			device, err := s.node.FindDeviceByAliasId(containerDevice.UUID)
+
+			if err == nil {
 				deviceID = device.Id
 			}
 
@@ -82,6 +86,20 @@ func (s *ContainerService) GetAllContainers(ctx context.Context, req *pb.GetAllC
 			containerReply.AllocatedMem = containerReply.AllocatedMem + containerDevice.Usedmem
 			containerReply.Type = containerDevice.Type
 			containerReply.AllocatedDevices++
+
+			if device == nil {
+				continue
+			}
+
+			containerReply.DeviceShareModes = append(containerReply.DeviceShareModes, device.ShareMode)
+			resp, err := s.ms.QueryInstant(ctx, &pb.QueryInstantRequest{Query: fmt.Sprintf("avg(sum(hami_container_memory_used{container_name=\"%s\",pod_name=~\"%s\",namespace_name=\"%s\"}) by (instance))", container.Name, container.PodName, container.Namespace)})
+			if err == nil && len(resp.Data) > 0 {
+				containerReply.DevicesMemUtilized = append(containerReply.DevicesMemUtilized, resp.Data[0].Value)
+			}
+			resp, err = s.ms.QueryInstant(ctx, &pb.QueryInstantRequest{Query: fmt.Sprintf("avg(sum(hami_container_core_util{container_name=\"%s\",pod_name=~\"%s\",namespace_name=\"%s\"}) by (instance))", container.Name, container.PodName, container.Namespace)})
+			if err == nil && len(resp.Data) > 0 {
+				containerReply.DevicesCoreUtilizedPercent = append(containerReply.DevicesCoreUtilizedPercent, resp.Data[0].Value)
+			}
 		}
 		if containerReply.DeviceIds == nil {
 			continue
