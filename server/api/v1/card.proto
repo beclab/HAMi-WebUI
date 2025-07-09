@@ -59,12 +59,18 @@ message GPUReply {
   int32 vgpu_used = 4;
   int32 vgpu_total = 5;
   int32 core_used = 6;
-  int32 core_total = 7;
-  int32 memory_used = 8;
-  int32 memory_total = 9;
-  string node_uid = 10;
-  bool health = 11;
-  string mode = 12;
+  int32 core_total = 8;
+  float core_utilized_percent = 7;
+  int32 memory_used = 9;
+  float memory_utilized = 10;
+  int32 memory_total = 11;
+  float memory_utilized_percent = 12;
+  string node_uid = 13;
+  bool health = 14;
+  string mode = 15;
+  string share_mode = 16;
+  float power = 17;
+  float temperature = 18;
 }
 
 message GPUsReply {

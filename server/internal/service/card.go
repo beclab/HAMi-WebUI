@@ -51,6 +51,7 @@ func (s *CardService) GetAllGPUs(ctx context.Context, req *pb.GetAllGpusReq) (*p
 		gpu.NodeUid = device.NodeUid
 		gpu.Health = device.Health
 		gpu.Mode = device.Mode
+		gpu.ShareMode = device.ShareMode
 
 		vGPU, core, memory, err := s.pod.StatisticsByDeviceId(ctx, device.AliasId)
 		if err == nil {
@@ -58,13 +59,22 @@ func (s *CardService) GetAllGPUs(ctx context.Context, req *pb.GetAllGpusReq) (*p
 			gpu.CoreUsed = core
 			gpu.MemoryUsed = memory
 		}
-		resp, err := s.ms.QueryInstant(ctx, &pb.QueryInstantRequest{Query: fmt.Sprintf("avg(hami_core_size{deviceuuid=~\"%s\"})", device.Id)})
+		resp, err := s.ms.QueryInstant(ctx, &pb.QueryInstantRequest{Query: fmt.Sprintf("avg(hami_core_util{deviceuuid=~\"%s\"})", device.Id)})
 		if err == nil && len(resp.Data) > 0 {
-			gpu.CoreTotal = int32(resp.Data[0].Value)
+			gpu.CoreUtilizedPercent = resp.Data[0].Value
 		}
-		resp, err = s.ms.QueryInstant(ctx, &pb.QueryInstantRequest{Query: fmt.Sprintf("avg(hami_memory_size{deviceuuid=~\"%s\"})", device.Id)})
+		resp, err = s.ms.QueryInstant(ctx, &pb.QueryInstantRequest{Query: fmt.Sprintf("avg(hami_memory_used{deviceuuid=~\"%s\"})", device.Id)})
 		if err == nil && len(resp.Data) > 0 {
-			gpu.MemoryTotal = int32(resp.Data[0].Value)
+			gpu.MemoryUtilized = resp.Data[0].Value
+			gpu.MemoryUtilizedPercent = 100 * float32(gpu.MemoryUtilized/float32(gpu.MemoryTotal))
+		}
+		resp, err = s.ms.QueryInstant(ctx, &pb.QueryInstantRequest{Query: fmt.Sprintf("avg by (device_no,driver_version) (hami_device_power{deviceuuid=~\"%s\"})", device.Id)})
+		if err == nil && len(resp.Data) > 0 {
+			gpu.Power = resp.Data[0].Value
+		}
+		resp, err = s.ms.QueryInstant(ctx, &pb.QueryInstantRequest{Query: fmt.Sprintf("avg by (device_no,driver_version) (hami_device_temperature{deviceuuid=~\"%s\"})", device.Id)})
+		if err == nil && len(resp.Data) > 0 {
+			gpu.Temperature = resp.Data[0].Value
 		}
 		res.List = append(res.List, gpu)
 	}
