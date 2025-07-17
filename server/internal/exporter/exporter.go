@@ -12,6 +12,7 @@ import (
 	"vgpu/internal/data/prom"
 	"vgpu/internal/provider/metax"
 	"vgpu/internal/provider/mlu"
+	"vgpu/internal/provider/util"
 	"vgpu/internal/service"
 
 	"github.com/google/wire"
@@ -170,7 +171,11 @@ func (s *MetricsGenerator) GenerateContainerMetrics(ctx context.Context) error {
 				}
 				vGPU = vGPU + 1
 				core = core + cd.Usedcores
-				memory = memory + cd.Usedmem
+				if device.ShareMode == util.ShareModeTimeSlicing {
+					memory = memory + device.Devmem
+				} else {
+					memory = memory + cd.Usedmem
+				}
 				provider = cd.Type
 			}
 			if provider == "" {
