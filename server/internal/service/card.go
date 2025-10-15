@@ -72,6 +72,10 @@ func (s *CardService) GetAllGPUs(ctx context.Context, req *pb.GetAllGpusReq) (*p
 		if err == nil && len(resp.Data) > 0 {
 			gpu.Power = resp.Data[0].Value
 		}
+		resp, err = s.ms.QueryInstant(ctx, &pb.QueryInstantRequest{Query: fmt.Sprintf("avg by (device_no,driver_version) (hami_device_power_limit{deviceuuid=~\"%s\"})", device.Id)})
+		if err == nil && len(resp.Data) > 0 {
+			gpu.PowerLimit = resp.Data[0].Value
+		}
 		resp, err = s.ms.QueryInstant(ctx, &pb.QueryInstantRequest{Query: fmt.Sprintf("avg by (device_no,driver_version) (hami_device_temperature{deviceuuid=~\"%s\"})", device.Id)})
 		if err == nil && len(resp.Data) > 0 {
 			gpu.Temperature = resp.Data[0].Value

@@ -132,6 +132,10 @@ func (s *MetricsGenerator) GenerateDeviceMetrics(ctx context.Context) error {
 		if err == nil {
 			HamiDevicePower.WithLabelValues(device.NodeName, provider, device.Type, device.Id, driver, deviceNo).Set(float64(gpuPower))
 		}
+		gpuPowerLimit, err := s.gpuPowerLimit(ctx, provider, device.Id)
+		if err == nil {
+			HamiDevicePowerLimit.WithLabelValues(device.NodeName, provider, device.Type, device.Id, driver, deviceNo).Set(float64(gpuPowerLimit))
+		}
 		fanSpeed, err := s.fanSpeed(ctx, provider, device.Id)
 		if err == nil {
 			switch provider {
@@ -436,6 +440,18 @@ func (s *MetricsGenerator) gpuPower(ctx context.Context, provider, deviceUUID st
 		power = power / 1000 // mW -> W
 	}
 	return power, err
+}
+
+// 功耗上限
+func (s *MetricsGenerator) gpuPowerLimit(ctx context.Context, provider, deviceUUID string) (float32, error) {
+	query := ""
+	switch provider {
+	case biz.NvidiaGPUDevice:
+		query = fmt.Sprintf("avg(DCGM_FI_DEV_ENFORCED_POWER_LIMIT{UUID=\"%s\"})", deviceUUID)
+	default:
+		return 0, errors.New("provider not exists")
+	}
+	return s.queryInstantVal(ctx, query)
 }
 
 // 硬件健康
