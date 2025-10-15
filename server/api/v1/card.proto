@@ -70,7 +70,8 @@ message GPUReply {
   string mode = 15;
   string share_mode = 16;
   float power = 17;
-  float temperature = 18;
+  float power_limit = 18;
+  float temperature = 19;
 }
 
 message GPUsReply {

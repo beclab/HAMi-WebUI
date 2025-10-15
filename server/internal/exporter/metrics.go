@@ -22,6 +22,7 @@ func init() {
 	prometheus.MustRegister(HamiDeviceTemperature)       // 显卡温度
 	prometheus.MustRegister(HamiDeviceMemoryTemperature) // 显存温度
 	prometheus.MustRegister(HamiDevicePower)             // 显卡功耗
+	prometheus.MustRegister(HamiDevicePowerLimit)        // 显卡功耗上限
 	prometheus.MustRegister(HamiDeviceFanSpeedP)         // 风扇转速（百分比）
 	prometheus.MustRegister(HamiDeviceFanSpeedR)         // 风扇转速（每分钟转速）
 	prometheus.MustRegister(HamiDeviceHardwareHealth)    // 显卡健康状态
@@ -60,6 +61,7 @@ func reset() {
 	HamiDeviceTemperature.Reset()
 	HamiDeviceMemoryTemperature.Reset()
 	HamiDevicePower.Reset()
+	HamiDevicePowerLimit.Reset()
 	HamiDeviceFanSpeedP.Reset()
 	HamiDeviceFanSpeedR.Reset()
 
@@ -155,6 +157,11 @@ var (
 	HamiDevicePower = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "hami_device_power",
 		Help: "gpu power",
+	}, []string{"node", "provider", "devicetype", "deviceuuid", "driver_version", "device_no"})
+
+	HamiDevicePowerLimit = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "hami_device_power_limit",
+		Help: "gpu power limit",
 	}, []string{"node", "provider", "devicetype", "deviceuuid", "driver_version", "device_no"})
 
 	HamiDeviceHardwareHealth = prometheus.NewGaugeVec(prometheus.GaugeOpts{
